@@ -23,8 +23,8 @@ public class BrainfuckVM {
     
     public void execute() {
         while (instructionPointer < code.length()) {
-            System.out.println(instructionPointer);
             char command = code.charAt(instructionPointer);
+//            System.out.println(instructionPointer + ": " + command);
             
             switch (command) {
                 case '<':
@@ -115,7 +115,7 @@ public class BrainfuckVM {
         int index;
         
         for (index = instructionPointer + 1; index < code.length(); ++index) {
-            char currentCharacter = (char) tape[index];
+            char currentCharacter = code.charAt(index);
             
             if (currentCharacter == ']') {
                 counter--;
@@ -142,7 +142,7 @@ public class BrainfuckVM {
         int index;
         
         for (index = instructionPointer - 1; index >= 0; --index) {
-            char currentCharacter = (char) tape[index];
+            char currentCharacter = code.charAt(index);
             
             if (currentCharacter == '[') {
                 counter--;
