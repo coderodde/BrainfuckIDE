@@ -171,7 +171,7 @@ public class App
                 char c = text.charAt(0);
                 text = text.substring(1);
                 inputField.setText(text);
-                stopWaitingForCharacterInput();
+                vm.onByteInput((byte) c);
             }
         });
     }
