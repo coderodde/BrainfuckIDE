@@ -1,10 +1,6 @@
 package net.coderodde.brainfuckide;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.HPos;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,12 +23,40 @@ import javafx.stage.Stage;
 public class App extends Application {
    
     private static final double PREFERRED_TEXTAREA_HEIGHT = 10000.0;
+    private static final Font APP_FONT = Font.font("Monospaced",
+                                                   FontWeight.BOLD,
+                                                   15.0);
+    private static final double INITIAL_WIDTH = 500.0;
+    private static final double INITIAL_HEIGHT = 400.0;
+    private static final String APP_TITLE = "Brainfuck IDE - 1.6";
     
     private final Button runButton       = new Button("Run");
     private final TextArea codeArea      = new TextArea();
     private final TextArea outputArea    = new TextArea();
     private final Label inputPromptLabel = new Label(">>>");
     private final TextField inputField   = new TextField();
+
+    private BlinkThread blinkThread;
+    
+    private void setComponentDimensions() {
+        codeArea.setMaxHeight(PREFERRED_TEXTAREA_HEIGHT);
+        codeArea.setPrefHeight(PREFERRED_TEXTAREA_HEIGHT);
+        
+        outputArea.setMaxHeight(PREFERRED_TEXTAREA_HEIGHT);
+        outputArea.setPrefHeight(PREFERRED_TEXTAREA_HEIGHT);
+        
+        // Makes sure the width of the input field occupies all available width:
+        HBox.setHgrow(inputField, Priority.ALWAYS);
+    }
+    
+    private void setTextWrapping() {
+        codeArea.wrapTextProperty().set(true);
+        outputArea.wrapTextProperty().set(true);
+    }
+    
+    private void setMiscAttributes() {
+        inputPromptLabel.setTranslateY(5.0);
+    }
     
     @Override
     public void start(Stage primaryStage) {
@@ -45,44 +69,21 @@ public class App extends Application {
                                      controlLine,
                                      outputArea);
         
-        codeArea.setMaxHeight(PREFERRED_TEXTAREA_HEIGHT);
-        codeArea.setPrefHeight(PREFERRED_TEXTAREA_HEIGHT);
-        
-        outputArea.setMaxHeight(PREFERRED_TEXTAREA_HEIGHT);
-        outputArea.setPrefHeight(PREFERRED_TEXTAREA_HEIGHT);
-        
-        // Makes sure the width of the input field occupies all available width:
-        HBox.setHgrow(inputField, Priority.ALWAYS);
-        
-        codeArea.wrapTextProperty().set(true);
-        outputArea.wrapTextProperty().set(true);
-        inputPromptLabel.setTranslateY(5.0);
-        
-        Font monospacedFont = Font.font("Monospaced", FontWeight.BOLD, 15.0);
-        inputPromptLabel.setFont(monospacedFont);
-        inputField.setFont(monospacedFont);
-        runButton.setFont(monospacedFont);
-        codeArea.setFont(monospacedFont);
-        outputArea.setFont(monospacedFont);
-        
-        Button btn = new Button();
-        btn.setText("Say 'Hello World'");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Hello World!");
-            }
-        });
+        setComponentDimensions();
+        setTextWrapping();
+        setMiscAttributes();
+        setComponentDimensions();
+        setComponentFonts();
         
         StackPane root = new StackPane();
-        root.getChildren().add(mainBox);
-        
-        Scene scene = new Scene(root, 300, 250);
-        
-        primaryStage.setTitle("Brainfuck IDE");
+        root.getChildren().add(mainBox);        
+        Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
+        primaryStage.setTitle(APP_TITLE);
         primaryStage.setScene(scene);
         primaryStage.show();
+        
+        startInputPromptBlinking();
+        
     }
 
     /**
@@ -93,4 +94,26 @@ public class App extends Application {
     public static void main(String[] args) {
         launch(args);
     }    
+    
+    private void setComponentFonts() {
+        codeArea.setFont(APP_FONT);
+        inputPromptLabel.setFont(APP_FONT);
+        inputField.setFont(APP_FONT);
+        runButton.setFont(APP_FONT);
+        outputArea.setFont(APP_FONT);
+    }
+    
+    private void startInputPromptBlinking() {
+        if (blinkThread == null) {
+            blinkThread = new BlinkThread(inputPromptLabel);
+            blinkThread.start();
+        }
+    }
+    
+    private void stopInputPromptBlinking() {
+        if (blinkThread != null) {
+            blinkThread.requestTermination();
+            blinkThread = null;
+        }
+    }
 }
