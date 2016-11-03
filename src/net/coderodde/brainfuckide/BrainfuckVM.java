@@ -1,6 +1,5 @@
 package net.coderodde.brainfuckide;
 
-import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
@@ -13,18 +12,25 @@ public class BrainfuckVM {
     private final byte[] tape = new byte[TAPE_LENGTH];
     private int instructionPointer; 
     private int dataPointer;
-    private final PrintStream out;
+    private final CharListener charListener;
+    private final CharacterInputRequestListener requestListener;
     
-    public BrainfuckVM(String code, PrintStream out) {
+    public BrainfuckVM(String code, 
+                       CharListener charListener,
+                       CharacterInputRequestListener requestListener) {
         this.code = Objects.requireNonNull(code, "The code is null.");
-        this.out = Objects.requireNonNull(out, "Output writer is null.");
+        this.charListener =
+                Objects.requireNonNull(charListener,
+                                       "The char listener is null.");
+        this.requestListener = 
+                Objects.requireNonNull(requestListener, 
+                                       "The request listener is null.");
         checkParenthesisStructure(code);
     }
     
     public void execute() {
         while (instructionPointer < code.length()) {
             char command = code.charAt(instructionPointer);
-//            System.out.println(instructionPointer + ": " + command);
             
             switch (command) {
                 case '<':
@@ -56,13 +62,18 @@ public class BrainfuckVM {
                     break;
                     
                 case ',':
+                    requestListener.startWaitingForCharacterInput();
                     return;
+                    
+                default:
+                    // Unrecognized character, omit it:
+                    ++instructionPointer;
             }
         }
     }
     
     private void outputCurrentDatum() {
-        out.print((char) tape[dataPointer]);
+        charListener.acceptChar((char) tape[dataPointer]);
         instructionPointer++;
     }
     
@@ -71,6 +82,7 @@ public class BrainfuckVM {
         // 'instructionPointer' points to the ',' command. Increment it in 
         // order to start fetching commands after the ',':
         instructionPointer++; 
+        requestListener.stopWaitingForCharacterInput();
         execute();
     }
     
