@@ -62,7 +62,7 @@ public class BrainfuckVM {
                     break;
                     
                 case ',':
-                    requestListener.startWaitingForCharacterInput();
+                    requestListener.requestCharacterInput();
                     return;
                     
                 default:

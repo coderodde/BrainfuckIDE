@@ -25,6 +25,9 @@ final class BlinkThread extends Thread {
             label.setVisible(false);
             sleep(SLEEP_DURATION);
         }
+        
+        // Keep the label visible:
+        label.setVisible(true);
     }
     
     private static void sleep(int milliseconds) {

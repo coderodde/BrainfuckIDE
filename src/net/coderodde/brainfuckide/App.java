@@ -42,9 +42,10 @@ public class App
     private final TextArea outputArea    = new TextArea();
     private final Label inputPromptLabel = new Label(">>>");
     private final TextField inputField   = new TextField();
-    private EventHandler<ActionEvent> inputFieldHandler;
-    private BrainfuckVM vm;
+    private final EventHandler<ActionEvent> inputFieldHandler = null;
     private BlinkThread blinkThread;
+    private BrainfuckVM vm;
+            
     
     @Override
     public void start(Stage primaryStage) {
@@ -63,23 +64,41 @@ public class App
         setComponentDimensions();
         setComponentFonts();
         setRunButtonListener();
-        setInputFieldHandler();
-        
-        inputField.setEditable(false);
         
         StackPane root = new StackPane();
         root.getChildren().add(mainBox);        
         Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
-        primaryStage.setOnCloseRequest(e -> Platform.exit());
+        primaryStage.setOnCloseRequest(e -> { onClose(); });
         primaryStage.setTitle(APP_TITLE);
         primaryStage.setScene(scene);
         primaryStage.show();
-        
     }
-
+    
     @Override
     public void acceptChar(char c) {
         outputArea.setText(outputArea.getText() + c);
+    }
+    
+    @Override
+    public void requestCharacterInput() {
+        String text = inputField.getText();
+        
+        if (text.isEmpty()) {
+            inputField.setEditable(true);
+            startInputPromptBlinking();
+            return;
+        }
+        
+        char c = text.charAt(0);
+        text = text.substring(1);
+        inputField.setText(text);
+        vm.onByteInput((byte) c);
+    }
+    
+    @Override
+    public void stopWaitingForCharacterInput() {
+//        inputField.setEditable(false);
+        stopInputPromptBlinking();
     }
     
     /**
@@ -156,35 +175,17 @@ public class App
         alert.showAndWait();
     }
     
-    private void setInputFieldHandler() {
-        inputField.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                // Consume the first character in the input field
-                String text = inputField.getText();
+    private void onClose() {
+        if (blinkThread != null) {
+            blinkThread.requestTermination();
+            
+            try {
+                blinkThread.join();
+            } catch (InterruptedException ex) {
                 
-                if (text.isEmpty()) {
-                    return;
-                }
-                
-                // Remove the first character of the text:
-                char c = text.charAt(0);
-                text = text.substring(1);
-                inputField.setText(text);
-                vm.onByteInput((byte) c);
             }
-        });
-    }
-
-    @Override
-    public void startWaitingForCharacterInput() {
-        startInputPromptBlinking();
-        inputField.setEditable(true);
-    }
-    
-    @Override
-    public void stopWaitingForCharacterInput() {
-        inputField.setEditable(false);
-        stopInputPromptBlinking();
+            
+            Platform.exit();
+        }
     }
 }
