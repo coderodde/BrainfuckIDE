@@ -92,6 +92,10 @@ public class App extends Application {
      * @param args the command line arguments.
      */
     public static void main(String[] args) {
+        BrainfuckVM vm = new BrainfuckVM("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.", System.out);
+        System.out.println("YOOOO!!!");
+        vm.execute();
+        
         launch(args);
     }    
     
