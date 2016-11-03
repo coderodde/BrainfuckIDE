@@ -43,6 +43,8 @@ public class App
     private final TextArea outputArea    = new TextArea();
     private final Label inputPromptLabel = new Label(">>>");
     private final TextField inputField   = new TextField();
+    private final HBox controlLine = new HBox();
+    private final VBox mainBox = new VBox();
     private final EventHandler<KeyEvent> inputFieldHandler;
     private BlinkThread blinkThread;
     private BrainfuckVM vm;
@@ -73,11 +75,9 @@ public class App
     
     @Override
     public void start(Stage primaryStage) {
-        HBox controlLine = new HBox();
         controlLine.getChildren().addAll(inputPromptLabel,
                                          inputField,
                                          runButton);
-        VBox mainBox = new VBox();
         mainBox.getChildren().addAll(codeArea,
                                      controlLine,
                                      outputArea);
