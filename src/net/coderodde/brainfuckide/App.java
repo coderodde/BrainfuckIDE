@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -42,10 +43,32 @@ public class App
     private final TextArea outputArea    = new TextArea();
     private final Label inputPromptLabel = new Label(">>>");
     private final TextField inputField   = new TextField();
-    private final EventHandler<ActionEvent> inputFieldHandler = null;
+    private final EventHandler<KeyEvent> inputFieldHandler;
     private BlinkThread blinkThread;
     private BrainfuckVM vm;
+    private boolean characterRequested;
             
+    public App() {
+        inputFieldHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (characterRequested) {
+                    String text = inputField.getText();
+                    
+                    if (text.isEmpty()) {
+                        return;
+                    }
+                    
+                    char c = text.charAt(0);
+                    text = text.substring(1);
+                    inputField.setText(text);
+                    vm.onByteInput((byte) c);
+                }
+            }
+        };
+        
+        inputField.setOnKeyTyped(inputFieldHandler);
+    }
     
     @Override
     public void start(Stage primaryStage) {
@@ -84,7 +107,7 @@ public class App
         String text = inputField.getText();
         
         if (text.isEmpty()) {
-            inputField.setEditable(true);
+            characterRequested = true;
             startInputPromptBlinking();
             return;
         }
