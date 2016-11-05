@@ -1,4 +1,4 @@
-package net.coderodde.brainfuckide;
+package net.coderodde.brainfuck.ide;
 
 public interface CharacterInputRequestListener {
 

@@ -1,8 +1,10 @@
-package net.coderodde.brainfuckide;
+package net.coderodde.brainfuck.vm;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
+import net.coderodde.brainfuck.ide.CharListener;
+import net.coderodde.brainfuck.ide.CharacterInputRequestListener;
 
 public class BrainfuckVM {
 

@@ -1,4 +1,4 @@
-package net.coderodde.brainfuckide;
+package net.coderodde.brainfuck.ide;
 
 import javafx.scene.control.Label;
 

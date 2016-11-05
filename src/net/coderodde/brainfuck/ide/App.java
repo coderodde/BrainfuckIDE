@@ -1,4 +1,4 @@
-package net.coderodde.brainfuckide;
+package net.coderodde.brainfuck.ide;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import net.coderodde.brainfuck.vm.BrainfuckVM;
 
 /**
  * This class is the actual Brainfuck IDE application.
