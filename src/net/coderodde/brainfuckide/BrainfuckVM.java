@@ -7,14 +7,14 @@ import java.util.Objects;
 public class BrainfuckVM {
 
     private static final int TAPE_LENGTH = 30_000;
-    
+
     private final String code;
     private final byte[] tape = new byte[TAPE_LENGTH];
     private int instructionPointer; 
     private int dataPointer;
     private final CharListener charListener;
     private final CharacterInputRequestListener requestListener;
-    
+
     public BrainfuckVM(String code, 
                        CharListener charListener,
                        CharacterInputRequestListener requestListener) {
@@ -27,56 +27,56 @@ public class BrainfuckVM {
                                        "The request listener is null.");
         checkParenthesisStructure(code);
     }
-    
+
     public void execute() {
         while (instructionPointer < code.length()) {
             char command = code.charAt(instructionPointer);
-            
+
             switch (command) {
                 case '<':
                     moveDataPointerLeft();
                     break;
-                   
+
                 case '>':
                     moveDataPointerRight();
                     break;
-                    
+
                 case '+':
                     incrementAtDataPointer();
                     break;
-                    
+
                 case '-':
                     decrementAtDataPointer();
                     break;
-                    
+
                 case '[':
                     processBlockBegin();
                     break;
-                    
+
                 case ']':
                     processBlockEnd();
                     break;
-                    
+
                 case '.':
                     outputCurrentDatum();
                     break;
-                    
+
                 case ',':
                     requestListener.requestCharacterInput();
                     return;
-                    
+
                 default:
                     // Unrecognized character, omit it:
                     ++instructionPointer;
             }
         }
     }
-    
+
     private void outputCurrentDatum() {
         charListener.acceptChar((char) tape[dataPointer]);
         instructionPointer++;
     }
-    
+
     public void onByteInput(byte inputByte) {
         tape[dataPointer] = inputByte;
         // 'instructionPointer' points to the ',' command. Increment it in 
@@ -85,53 +85,53 @@ public class BrainfuckVM {
         requestListener.stopWaitingForCharacterInput();
         execute();
     }
-    
+
     private void moveDataPointerLeft() {
         dataPointer--;
         instructionPointer++;
-        
+
         if (dataPointer < 0) {
             throw new IllegalStateException(
                     "Data pointer (" + dataPointer + ") out of tape.");
         }
     }
-    
+
     private void moveDataPointerRight() {
         dataPointer++;
         instructionPointer++;
-        
+
         if (dataPointer >= tape.length) {
             throw new IllegalStateException(
                     "Data pointer (" + dataPointer + ") out of tape. Tape " + 
                     "length = " + tape.length + ".");
         }
     }
-    
+
     private void incrementAtDataPointer() {
         instructionPointer++;
         tape[dataPointer]++;
     }
-    
+
     private void decrementAtDataPointer() {
         instructionPointer++;
         tape[dataPointer]--;
     }
-    
+
     private void processBlockBegin() {
         if (tape[dataPointer] != 0) {
             instructionPointer++;
             return;
         } 
-        
+
         int counter = 1;
         int index;
-        
+
         for (index = instructionPointer + 1; index < code.length(); ++index) {
             char currentCharacter = code.charAt(index);
-            
+
             if (currentCharacter == ']') {
                 counter--;
-                
+
                 if (counter == 0) {
                     break;
                 }
@@ -139,26 +139,26 @@ public class BrainfuckVM {
                 counter++;
             }
         }
-        
+
         // Move past the matching ']':
         instructionPointer = index + 1;
     }
-    
+
     private void processBlockEnd() {
         if (tape[dataPointer] == 0) {
             instructionPointer++;
             return;
         }
-        
+
         int counter = 1;
         int index;
-        
+
         for (index = instructionPointer - 1; index >= 0; --index) {
             char currentCharacter = code.charAt(index);
-            
+
             if (currentCharacter == '[') {
                 counter--;
-                
+
                 if (counter == 0) {
                     break;
                 }
@@ -166,15 +166,15 @@ public class BrainfuckVM {
                 counter++;
             }
         }
-        
+
         instructionPointer = index + 1;
     }
-    
+
     private void checkParenthesisStructure(String code) {
         Deque<Character> stack = new ArrayDeque<>();
         RuntimeException exception =
                 new IllegalArgumentException("Bad bracket structure");
-        
+
         for (char c : code.toCharArray()) {
             if (c == '[') {                
                 stack.addLast(c);
@@ -182,7 +182,7 @@ public class BrainfuckVM {
                 if (stack.isEmpty()) {
                     throw exception;
                 }
-                
+
                 if (stack.getLast().equals('[')) {
                     stack.removeLast();
                 } else {
@@ -190,7 +190,7 @@ public class BrainfuckVM {
                 }
             }
         }
-        
+
         if (!stack.isEmpty()) {
             throw exception;
         }

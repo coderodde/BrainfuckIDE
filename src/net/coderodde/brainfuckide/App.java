@@ -29,7 +29,7 @@ import javafx.stage.Stage;
 public class App 
         extends Application 
         implements CharListener, CharacterInputRequestListener {
-   
+
     private static final double PREFERRED_TEXTAREA_HEIGHT = 10000.0;
     private static final Font APP_FONT = Font.font("Monospaced",
                                                    FontWeight.BOLD,
@@ -37,7 +37,7 @@ public class App
     private static final double INITIAL_WIDTH = 500.0;
     private static final double INITIAL_HEIGHT = 400.0;
     private static final String APP_TITLE = "Brainfuck IDE - 1.6";
-    
+
     private final Button runButton       = new Button("Run");
     private final TextArea codeArea      = new TextArea();
     private final TextArea outputArea    = new TextArea();
@@ -49,30 +49,26 @@ public class App
     private BlinkThread blinkThread;
     private BrainfuckVM vm;
     private boolean characterRequested;
-            
+
     public App() {
         inputFieldHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
                 if (characterRequested) {
-                    String text = inputField.getText();
-                    
-                    if (text.isEmpty()) {
-                        return;
-                    }
-                    
+                    String text = inputField.getText() + event.getCharacter();
                     char c = text.charAt(0);
                     text = text.substring(1);
                     inputField.setText(text);
                     characterRequested = false;
+                    event.consume();
                     vm.onByteInput((byte) c);
                 }
             }
         };
-        
+
         inputField.setOnKeyTyped(inputFieldHandler);
     }
-    
+
     @Override
     public void start(Stage primaryStage) {
         controlLine.getChildren().addAll(inputPromptLabel,
@@ -81,14 +77,14 @@ public class App
         mainBox.getChildren().addAll(codeArea,
                                      controlLine,
                                      outputArea);
-        
+
         setComponentDimensions();
         setTextWrapping();
         setMiscAttributes();
         setComponentDimensions();
         setComponentFonts();
         setRunButtonListener();
-        
+
         StackPane root = new StackPane();
         root.getChildren().add(mainBox);        
         Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
@@ -97,33 +93,33 @@ public class App
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-    
+
     @Override
     public void acceptChar(char c) {
         outputArea.setText(outputArea.getText() + c);
     }
-    
+
     @Override
     public void requestCharacterInput() {
         String text = inputField.getText();
-        
+
         if (text.isEmpty()) {
             characterRequested = true;
             startInputPromptBlinking();
             return;
         }
-        
+
         char c = text.charAt(0);
         text = text.substring(1);
         inputField.setText(text);
         vm.onByteInput((byte) c);
     }
-    
+
     @Override
     public void stopWaitingForCharacterInput() {
         stopInputPromptBlinking();
     }
-    
+
     /**
      * Launches the application.
      * 
@@ -132,7 +128,7 @@ public class App
     public static void main(String[] args) {
         launch(args);
     }    
-    
+
     private void setComponentFonts() {
         codeArea.setFont(APP_FONT);
         inputPromptLabel.setFont(APP_FONT);
@@ -140,41 +136,41 @@ public class App
         runButton.setFont(APP_FONT);
         outputArea.setFont(APP_FONT);
     }
-    
+
     private void startInputPromptBlinking() {
         if (blinkThread == null) {
             blinkThread = new BlinkThread(inputPromptLabel);
             blinkThread.start();
         }
     }
-    
+
     private void stopInputPromptBlinking() {
         if (blinkThread != null) {
             blinkThread.requestTermination();
             blinkThread = null;
         }
     }
-    
+
     private void setComponentDimensions() {
         codeArea.setMaxHeight(PREFERRED_TEXTAREA_HEIGHT);
         codeArea.setPrefHeight(PREFERRED_TEXTAREA_HEIGHT);
-        
+
         outputArea.setMaxHeight(PREFERRED_TEXTAREA_HEIGHT);
         outputArea.setPrefHeight(PREFERRED_TEXTAREA_HEIGHT);
-        
+
         // Makes sure the width of the input field occupies all available width:
         HBox.setHgrow(inputField, Priority.ALWAYS);
     }
-    
+
     private void setTextWrapping() {
         codeArea.wrapTextProperty().set(true);
         outputArea.wrapTextProperty().set(true);
     }
-    
+
     private void setMiscAttributes() {
         inputPromptLabel.setTranslateY(5.0);
     }
-    
+
     private void setRunButtonListener() {
         runButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -190,24 +186,24 @@ public class App
             }
         });
     }
-    
+
     private void showExceptionDialog(Exception ex) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Error");
         alert.setContentText(ex.getMessage());
         alert.showAndWait();
     }
-    
+
     private void onClose() {
         if (blinkThread != null) {
             blinkThread.requestTermination();
-            
+
             try {
                 blinkThread.join();
             } catch (InterruptedException ex) {
-                
+
             }
-            
+
             Platform.exit();
         }
     }
